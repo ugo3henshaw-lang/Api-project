@@ -20,35 +20,47 @@ const MIME_TYPES = {
 };
 
 function sendJson(res, statusCode, payload) {
-  res.writeHead(statusCode, { 'Content-Type': 'application/json; charset=utf-8' });
+  res.statusCode = statusCode;
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
   res.end(JSON.stringify(payload));
+}
+
+function sendFile(res, filePath) {
+  const extension = path.extname(filePath);
+  const contentType = MIME_TYPES[extension] || 'application/octet-stream';
+  res.statusCode = 200;
+  res.setHeader('Content-Type', contentType);
+  fs.readFile(filePath, (error, content) => {
+    if (error) {
+      sendJson(res, 500, { error: 'Unable to read file' });
+      return;
+    }
+    res.end(content);
+  });
 }
 
 function serveStatic(req, res) {
   const requestPath = req.url === '/' ? '/index.html' : req.url.split('?')[0];
   const safePath = path.normalize(requestPath).replace(/^\/(?:\.\.(?:\/|$))+/g, '');
-  const filePath = path.join(ROOT_DIR, safePath);
+  const relativePath = safePath.replace(/^\/+/, '');
+  const filePath = path.join(ROOT_DIR, relativePath || 'index.html');
 
   if (!filePath.startsWith(ROOT_DIR)) {
     sendJson(res, 403, { error: 'Forbidden' });
     return;
   }
 
-  fs.readFile(filePath, (error, content) => {
-    if (error) {
-      if (error.code === 'ENOENT') {
-        sendJson(res, 404, { error: 'Not found' });
-      } else {
-        sendJson(res, 500, { error: 'Unable to read file' });
-      }
-      return;
-    }
+  if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+    sendFile(res, filePath);
+    return;
+  }
 
-    const extension = path.extname(filePath);
-    const contentType = MIME_TYPES[extension] || 'application/octet-stream';
-    res.writeHead(200, { 'Content-Type': contentType });
-    res.end(content);
-  });
+  if (requestPath === '/' || requestPath === '/index.html') {
+    sendFile(res, path.join(ROOT_DIR, 'index.html'));
+    return;
+  }
+
+  sendJson(res, 404, { error: 'Not found' });
 }
 
 function readBody(req) {
@@ -108,15 +120,22 @@ function proxyRequest(req, res) {
     });
 }
 
-const server = http.createServer((req, res) => {
+function handleRequest(req, res) {
   if (req.url.startsWith('/api')) {
-    proxyRequest(req, res);
-    return;
+    return proxyRequest(req, res);
   }
 
-  serveStatic(req, res);
+  return serveStatic(req, res);
+}
+
+const server = http.createServer((req, res) => {
+  handleRequest(req, res);
 });
 
-server.listen(PORT, () => {
-  console.log(`Secrets Hub server listening on http://localhost:${PORT}`);
-});
+if (require.main === module) {
+  server.listen(PORT, () => {
+    console.log(`Secrets Hub server listening on http://localhost:${PORT}`);
+  });
+}
+
+module.exports = handleRequest;
