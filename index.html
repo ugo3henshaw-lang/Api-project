@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Secrets Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand-block">
+        <div class="brand-mark">S</div>
+        <div>
+          <h1>Secrets Hub</h1>
+          <p>Explore, create, and manage your secret collection.</p>
+        </div>
+      </div>
+      <nav class="main-nav">
+        <a href="#discover">Discover</a>
+        <a href="#dashboard">Dashboard</a>
+        <button id="logoutBtn" class="ghost-btn" type="button">Log out</button>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero card">
+        <div class="hero-copy">
+          <p class="eyebrow">Securely connected to the Secrets API</p>
+          <h2>Share your story, browse bold confessions, and keep your account in sync.</h2>
+          <p class="hero-text">
+            Register, sign in, and manage your own secrets with a polished experience built around the
+            public, protected, and token-based endpoints from the API.
+          </p>
+          <div class="hero-actions">
+            <a class="primary-btn" href="#dashboard">Open dashboard</a>
+            <button id="loadRandomBtn" class="secondary-btn" type="button">Load another secret</button>
+          </div>
+          <div id="messageArea" class="message" role="status" aria-live="polite"></div>
+        </div>
+        <div class="hero-panel">
+          <h3>Today’s spotlight</h3>
+          <div id="randomSecretContent" class="spotlight-card"></div>
+        </div>
+      </section>
+
+      <section id="discover" class="card section-card">
+        <div class="section-header">
+          <div>
+            <p class="eyebrow">Public API</p>
+            <h3>Random secret discovery</h3>
+          </div>
+          <button id="refreshSecretBtn" class="secondary-btn" type="button">Refresh</button>
+        </div>
+        <div id="publicSecretDetail" class="content-shell"></div>
+      </section>
+
+      <section id="authSection" class="card section-card">
+        <div class="section-header">
+          <div>
+            <p class="eyebrow">Authentication</p>
+            <h3>Join or sign in</h3>
+          </div>
+          <div class="switches">
+            <button class="switch-btn active" data-mode="login" type="button">Login</button>
+            <button class="switch-btn" data-mode="register" type="button">Register</button>
+          </div>
+        </div>
+        <form id="authForm" class="stack-form">
+          <label>
+            Username
+            <input id="usernameInput" name="username" required placeholder="Enter your username" />
+          </label>
+          <label>
+            Password
+            <input id="passwordInput" name="password" type="password" required placeholder="Choose a secure password" />
+          </label>
+          <button class="primary-btn" type="submit">Continue</button>
+        </form>
+      </section>
+
+      <section id="dashboard" class="dashboard" hidden>
+        <section class="card section-card">
+          <div class="section-header">
+            <div>
+              <p class="eyebrow">Workspace</p>
+              <h3 id="welcomeHeading">Welcome back</h3>
+            </div>
+            <div class="pill-group">
+              <span class="status-pill" id="authStatus">Authenticated</span>
+              <span class="status-pill" id="apiKeyStatus">API key pending</span>
+            </div>
+          </div>
+          <div id="userSummary" class="summary-grid"></div>
+        </section>
+
+        <div class="grid-layout">
+          <section class="card section-card">
+            <div class="section-header">
+              <div>
+                <p class="eyebrow">Create</p>
+                <h3>New secret</h3>
+              </div>
+            </div>
+            <form id="createSecretForm" class="stack-form">
+              <label>
+                Secret
+                <textarea id="secretInput" name="secret" rows="4" required placeholder="What would you like to share?"></textarea>
+              </label>
+              <label>
+                Embarrassment score
+                <input id="scoreInput" name="score" type="number" min="1" max="10" required placeholder="1-10" />
+              </label>
+              <button class="primary-btn" type="submit">Create secret</button>
+            </form>
+          </section>
+
+          <section class="card section-card">
+            <div class="section-header">
+              <div>
+                <p class="eyebrow">Filter</p>
+                <h3>Browse by sensitivity</h3>
+              </div>
+            </div>
+            <form id="filterForm" class="stack-form">
+              <label>
+                Minimum score
+                <input id="filterScoreInput" name="score" type="number" min="1" max="10" value="5" required />
+              </label>
+              <button class="secondary-btn" type="submit">Apply filter</button>
+            </form>
+            <div id="filteredSecretsList" class="list-stack"></div>
+          </section>
+        </div>
+
+        <div class="grid-layout">
+          <section class="card section-card">
+            <div class="section-header">
+              <div>
+                <p class="eyebrow">Explore</p>
+                <h3>All secrets</h3>
+              </div>
+              <div class="pager">
+                <button id="prevPageBtn" class="ghost-btn" type="button">Previous</button>
+                <button id="nextPageBtn" class="ghost-btn" type="button">Next</button>
+              </div>
+            </div>
+            <div id="allSecretsList" class="list-stack"></div>
+          </section>
+
+          <section class="card section-card">
+            <div class="section-header">
+              <div>
+                <p class="eyebrow">Your profile</p>
+                <h3>Your submitted secrets</h3>
+              </div>
+            </div>
+            <div id="userSecretsList" class="list-stack"></div>
+          </section>
+        </div>
+
+        <section class="card section-card">
+          <div class="section-header">
+            <div>
+              <p class="eyebrow">Details</p>
+              <h3>Secret inspector</h3>
+            </div>
+          </div>
+          <div id="detailContent" class="detail-shell"></div>
+        </section>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
