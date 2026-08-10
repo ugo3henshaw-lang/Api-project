@@ -40,6 +40,8 @@ The app demonstrates how a modern web experience can sit on top of a real REST A
 
 The app uses a small local proxy so browser requests can reach the remote Secrets API without CORS errors.
 
+For Vercel deployment, the app is configured to serve the static files directly and proxy API calls through a lightweight serverless endpoint.
+
 ## Challenges encountered
 
 - The API uses multiple authentication patterns across different endpoints, so the app needed a clean state manager to switch between basic auth, API key requests, and bearer tokens.
